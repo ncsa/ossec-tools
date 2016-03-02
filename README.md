@@ -4,25 +4,25 @@ Scripts and integrations for OSSEC
 ## Active Response
 Custom AR scripts
 
-* virustotal_lookup.sh/virus_total.py - Look up hash from syscheck alerts in VT database
-* cymru_lookup.sh - Look up hash from sysheck alerts in Team Cymru Malware Hash Registery
-* puppetdb_lookup - Look up managed files in PuppetDB
-* rpm_lookup - Look up files that changed from RPM install
-* deb_lookup - Lookup file that changes from DEB install
-* time_lookup - Check if system clock is off for incoming logs
-* command_search - Search for malicious commands across logs
-* cif.sh - Create intelligence feed from alerts
-* bhr.sh - Block hosts at perimeter using Black Hole Router by Justin Azoff
-* add_to_cdb.sh - Add entries from alerts to system database e.g. system users
-* rule-all.sh - Run many of the above scripts
-* syscheck-all.sh - Run many of the syscheck scripts
+* active-response/virustotal_lookup.sh/virus_total.py - Look up hash from syscheck alerts in VT database
+* active-response/cymru_lookup.sh - Look up hash from sysheck alerts in Team Cymru Malware Hash Registery
+* active-response/puppetdb_lookup - Look up managed files in PuppetDB
+* active-response/rpm_lookup - Look up files that changed from RPM install
+* active-response/deb_lookup - Lookup file that changes from DEB install
+* active-response/time_lookup - Check if system clock is off for incoming logs
+* active-response/command_search - Search for malicious commands across logs
+* active-response/cif.sh - Create intelligence feed from alerts
+* active-response/bhr.sh - Block hosts at perimeter using Black Hole Router by Justin Azoff
+* active-response/add_to_cdb.sh - Add entries from alerts to system database e.g. system users
+* active-response/rule-all.sh - Run many of the above scripts
+* active-response/syscheck-all.sh - Run many of the syscheck scripts
 
 ## Decoders
 Custom decoders
 
-* kerberos.xml - Decoder for ksu and kadmind logs
-* active_response.xml - Decoder for logs generated from our active response scripts
-* sudo.xml - Improved sudo decoder 
+* decoders/kerberos.xml - Decoder for ksu and kadmind logs
+* decoders/active_response.xml - Decoder for logs generated from our active response scripts
+* decoders/sudo.xml - Improved sudo decoder 
 
 ## Rules
 Custom rules
@@ -50,6 +50,8 @@ $ ls /etc/munin/plugins/ossec_*
 Configuration
 ```
 $ cat /etc/munin/plugin-conf.d/ossec_*
+[ossec_ar_stats]
+user root
 [ossec_stats]
 user root
 [ossec_top_groups]
@@ -61,12 +63,10 @@ user root
 ![Munin Graphs](https://raw.githubusercontent.com/ncsa/ossec-tools/master/munin/ossec_munin.png)
 
 ## Nagios
-Plugins to check OSSEC services
+Plugins to check OSSEC services. There's two scripts but the python script `check_ossec.py` is newer and has more features.
+Examples of both are listed below.
 
-* nagios/check_ossec.py - Checks services, connected agents, syscheck & rootcheck scan times (newer, better than check_ossec.sh)
-* nagios/check_ossec.sh - Checks services, connected agents
-
-* Check status of OSSEC services excluding active response i.e. execd
+* Check status of OSSEC services excluding active response service (execd)
   * `./check_ossec.py -T status`
 * Check that all agents are connected except host1
   * `./check_ossec.py -T connected --skip host1.blah.org`
