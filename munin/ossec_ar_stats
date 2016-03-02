@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+FILE=/var/ossec/logs/active-responses.log
+DIR=/var/ossec/active-response/bin
+config(){
+cat <<EOF
+graph_title OSSEC Active Response Stats
+graph_category process
+graph_vlabel Response Counters
+graph_info Stats
+graph_period minute
+EOF
+}
+
+[[ -d $DIR ]] || exit
+
+strip(){
+ local msg
+ msg="$@"
+ msg=$(basename $msg)
+ msg=${msg%%.*}
+ msg=${msg/-/_}
+ msg=${msg// }
+ s="$msg"
+}
+
+if [[ "$1" == "config" ]]; then
+  config
+  for s in $DIR/*; do
+    strip $s
+    printf "${s}.label ${s}\n"
+    printf "${s}.min 0\n"
+    printf "${s}.type GAUGE\n"
+    printf "${s}.info Count ${Q}\n"
+  done
+else
+    date="$(date +"%a %b %e")"
+    for s in $DIR/*; do
+      ar="$s"
+      strip $s
+      count=$(grep "$date" $FILE | grep -c "$ar")
+      printf "${s}.value ${count}\n"
+    done
+fi

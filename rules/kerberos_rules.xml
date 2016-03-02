@@ -1,0 +1,118 @@
+<!-- Rules for Kerberos -->
+
+<group name="syslog,kerberos,">
+  <rule id="15000" level="0">
+    <decoded_as>kerberos_ksu</decoded_as>
+    <description>Kerberos messages grouped.</description>
+  </rule>
+
+  <!-- Auth success -->
+  
+  <rule id="15001" level="3">
+    <if_sid>15000</if_sid>
+    <decoded_as>kerberos_ksu</decoded_as>
+    <regex>authenticated</regex>
+    <description>ksu authentication succeeded.</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="15002" level="5">
+    <if_sid>15001</if_sid>
+    <user>root</user>
+    <description>ksu root authentication succeeded.</description>
+    <group>authentication_success,</group>
+  </rule>
+  
+  <!-- Auth failed -->
+
+  <rule id="15003" level="3">
+    <if_sid>15000</if_sid>
+    <decoded_as>kerberos_ksu</decoded_as>
+    <regex>authentication failed</regex>
+    <description>ksu authentication failed.</description>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <rule id="15004" level="10">
+    <if_sid>15003</if_sid>
+    <user>root</user>
+    <description>ksu authentication to root failed.</description>
+    <group>authentication_failed,</group>
+  </rule>
+
+  <!-- AuthZ succeeded -->
+
+  <rule id="15005" level="3">
+    <if_sid>15000</if_sid>
+    <decoded_as>kerberos_ksu</decoded_as>
+    <regex>authorization for \S+ successful</regex>
+    <description>ksu authorization succeeded.</description>
+    <group>authentication_success,</group>
+  </rule>
+  
+  <rule id="15006" level="3">
+    <if_sid>15000</if_sid>
+    <decoded_as>kerberos_ksu</decoded_as>
+    <regex>authorization for \S+ for execution of \S+ successful</regex>
+    <description>ksu authorization succeeded to run command.</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="15007" level="5">
+    <if_sid>15005, 15006</if_sid>
+    <user>root</user>
+    <description>ksu authorization to root succeeded.</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="15008" level="5">
+    <if_sid>15007</if_sid>
+    <if_fts></if_fts>
+    <options>alert_by_email</options>
+    <description>First time (ksu) is executed by user.</description>
+  </rule>
+
+<!-- Rules for Kadmin -->
+
+  <rule id="15100" level="0">
+    <decoded_as>kerberos_kadmin</decoded_as>
+    <description>Kerberos messages grouped.</description>
+  </rule>
+
+  <!-- Principal successes -->
+
+  <rule id="15101" level="11">
+    <if_sid>15100</if_sid>
+    <match>create_principal</match>
+    <status>success</status>
+    <description>Kerberus principal created</description>
+    <group>adduser,account_changed</group>
+  </rule>
+
+  <rule id="15102" level="5">
+    <if_sid>15100</if_sid>
+    <match>get_principal</match>
+    <status>success</status>
+    <description>Kerberus principal successfully requested</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="15103" level="11">
+    <if_sid>15100</if_sid>
+    <match>modify_principal</match>
+    <status>success</status>
+    <description>Kerberus principal successfully modified</description>
+    <group>adduser,account_changed</group>
+  </rule>
+
+  <!-- Principal failures -->
+
+  <rule id="15104" level="11">
+    <if_sid>15100</if_sid>
+    <match>get_principal</match>
+    <status>Principal does not exist</status>
+    <description>Invalid Kerberus principal requested</description>
+    <group>invalid_login</group>
+  </rule>
+
+</group>

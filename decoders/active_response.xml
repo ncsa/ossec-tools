@@ -1,0 +1,70 @@
+<!--
+      - rpm_lookup decoder
+ - Will extract the status and filename (as id)
+ - Examples:
+ - 2016-01-26T13:18:55.940806-06:00 ossec-sec rpm_lookup.sh: OK: /usr/bin/floppy (Regular file) RPM verification passed
+ -->
+<decoder name="rpm_lookup">
+  <program_name>^rpm_lookup.sh$</program_name>
+</decoder>
+
+<decoder name="rpm_lookup_info">
+  <parent>rpm_lookup</parent>
+  <regex>^(\S+): (\S+)</regex>
+  <order>status, id</order>
+</decoder>
+
+<!--
+      - deb_lookup decoder
+ - Will extract the status and filename (as id)
+ - Examples:
+ - 2016-01-26T13:18:55.940806-06:00 ossec-sec deb_lookup.sh: OK: /usr/bin/floppy DEB verification passed
+ -->
+<decoder name="deb_lookup">
+  <program_name>^deb_lookup.sh$</program_name>
+</decoder>
+
+<decoder name="deb_lookup_info">
+  <parent>deb_lookup</parent>
+  <regex>^(\S+): (\S+)</regex>
+  <order>status, id</order>
+</decoder>
+
+<!--
+      - puppetdb_lookup decoder
+ - Will extract the status and filename (as id)
+ - Examples:
+ - 2016-01-26T13:33:20.774122-06:00 ossec-sec puppetdb_lookup.sh: WARNING: File /usr/bin/javac not found for host1.blah.org
+ -->
+<decoder name="puppetdb_lookup">
+  <program_name>^puppetdb_lookup.sh$</program_name>
+</decoder>
+
+<decoder name="puppetdb_lookup_info">
+  <parent>puppetdb_lookup</parent>
+  <regex>^(\S+): File (\S+)</regex>
+  <order>status, id</order>
+</decoder>
+
+<!--
+      - cymru_lookup decoder
+ - Will extract the status and filename (as id)
+ - Examples:
+ - 2016-01-28T15:17:57.091010-06:00 ossec-sec cymru_lookup.sh: OK: No match found for /usr/bin/gpg2 (4db4cd6a6c007694409c8dfc3cca8017edb8be05) on (host1.blah.org)
+ - 2016-01-28T15:17:57.091010-06:00 ossec-sec cymru_lookup.sh: WARNING: Malicious hash found for /usr/bin/gpg2 (4db4cd6a6c007694409c8dfc3cca8017edb8be05) on (host1.blah.org)
+ -->
+<decoder name="cymru_lookup">
+  <program_name>^cymru_lookup.sh$</program_name>
+</decoder>
+
+<decoder name="cymru_lookup_ok_info">
+  <parent>cymru_lookup</parent>
+  <regex>^(\S+): No match found for \S+ \((\S+)\)</regex>
+  <order>status, id</order>
+</decoder>
+
+<decoder name="cymru_lookup_warning_info">
+  <parent>cymru_lookup</parent>
+  <regex>^(\S+): Malicious hash found for \S+ \((\S+)\)</regex>
+  <order>status, id</order>
+</decoder>

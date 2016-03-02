@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+FILE=/var/ossec/logs/alerts/alerts.log
+OPTION="$1"
+
+config(){
+cat <<EOF
+graph_title OSSEC Top Groups
+graph_category process
+graph_vlabel Groups by Name
+graph_info Count
+graph_period minute
+EOF
+}
+
+top_10(){
+  grep '\*\* Alert' /var/ossec/logs/alerts/alerts.log | cut -d '-' -f 2 | sed -e 's/,/\n/g' -e 's/\s//' | grep . | sort | uniq -c | sort -nr | head
+}
+
+values(){
+  top="$(top_10)"
+  IFS=$'\n'
+  for i in $top;
+  do
+    line=$(echo $i | xargs)
+    count="${line%% *}"
+    group="${line#* }"
+    if [[ "$OPTION" == "config" ]]; then
+      printf "${group}\n"
+    else
+      printf "${group}.value ${count}\n"
+    fi
+  done
+}
+
+[[ -r $FILE ]] || { printf "File not found!\n"; exit 1; }
+
+if [[ "$OPTION" == "config" ]]; then
+  config
+  messages="$(values)"
+  IFS=$'\n'
+  for s in $messages
+  do
+    printf "${s}.label ${s}\n"
+    printf "${s}.min 0\n"
+    printf "${s}.type GAUGE\n"
+    printf "${s}.info Count ${Q}\n"
+  done
+else
+  values
+fi

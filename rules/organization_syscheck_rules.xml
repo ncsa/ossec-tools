@@ -1,0 +1,32 @@
+<!-- organization custom rules -->
+
+<!-- Note that <hostname> matches agent name, not hostname field in log line -->
+
+<group name="organization,organization_syscheck">
+
+  <rule id="110000" level="4">
+    <if_sid>550</if_sid>
+    <match>/var/ossec/lists/</match>
+    <description>a CDB list has been modified</description>
+    <options>no_log</options>
+  </rule>
+
+  <rule id="110001" level="11">
+    <if_sid>550</if_sid>
+    <match>/etc/krb5.keytab</match>
+    <description>Priority file alert, Kerberos keytab file modified</description>
+  </rule>
+
+  <rule id="110002" level="12">
+    <if_sid>550</if_sid>
+    <match>/etc/khupd2.p2</match>
+    <description>Phalanx rootkitt</description>
+  </rule>
+
+  <rule id="110003" level="1">
+    <if_group>syscheck</if_group>
+    <match>/var/ossec/etc/shared/agent.conf</match>
+    <description>agent.conf was modified</description>
+  </rule>
+
+</group> <!-- SYSLOG,LOCAL -->

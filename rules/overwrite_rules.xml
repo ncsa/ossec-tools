@@ -1,0 +1,89 @@
+<!-- organization overwrite rules --> 
+
+<var name="NEW_BAD_WORDS">core_dumped|error|attack|bad |illegal |fatal|Segmentation Fault|Corrupted</var>
+
+<!-- Keep original intact and set level to 0 to ignore -->
+
+<group name="overwrite">
+
+  <rule id="502" level="3" overwrite="yes">
+    <if_sid>500</if_sid>
+    <match>Ossec started</match>
+    <description>Ossec server started.</description>
+  </rule>
+
+  <rule id="554" level="10" overwrite="yes">
+    <category>ossec</category>
+    <decoded_as>syscheck_new_entry</decoded_as>
+    <description>File added to the system.</description>
+    <group>syscheck,</group>
+  </rule>
+
+  <rule id="591" level="0" overwrite="yes">
+    <if_sid>500</if_sid>
+    <match>^ossec: File rotated </match>
+    <description>Log file rotated.</description>
+  </rule>
+
+  <rule id="1002" level="2" overwrite="yes">
+    <match>$NEW_BAD_WORDS</match>
+    <options>alert_by_email</options>
+    <description>Unknown problem somewhere in the system.</description>
+  </rule>
+
+  <rule id="1003" level="2" maxsize="1025" overwrite="yes">
+    <description>Non standard syslog message (size too large).</description>
+  </rule>
+
+  <rule id="5703" level="10" frequency="4" timeframe="360" overwrite="yes">
+    <if_matched_sid>5702</if_matched_sid>
+    <description>Possible breakin attempt </description>
+    <description>(high number of reverse lookup errors).</description>
+    <options>no_email_alert</options>
+  </rule>
+
+  <rule id="5710" level="5" overwrite="yes">
+    <if_sid>5700</if_sid>
+    <match>illegal user|invalid user</match>
+    <description>Attempt to login using a non-existent user</description>
+    <group>invalid_login,authentication_failed,</group>
+    <options>no_log</options>
+  </rule>
+
+  <rule id="5741" level="4" overwrite="yes">
+    <if_sid>5700</if_sid>
+    <match>Connection refused$</match>
+    <description>ssh connection refused</description>
+    <options>no_log</options>
+  </rule>
+
+  <rule id="5109" level="0" overwrite="yes">
+    <if_sid>5100</if_sid>
+    <match>I/O error: dev |end_request: I/O error, dev</match>
+    <description>Kernel Input/Output error</description>
+  </rule>
+
+  <rule id="10100" level="4" overwrite="yes">
+    <if_group>authentication_success</if_group>
+    <if_fts></if_fts>
+    <group>authentication_success</group>
+    <description>First time user logged in.</description>
+  </rule> 
+
+  <rule id="5104" level="11" overwrite="yes">
+    <if_sid>5100</if_sid>
+    <regex>Promiscuous mode enabled|</regex>
+    <regex>device \S+ entered promiscuous mode</regex>
+    <description>Interface entered in promiscuous(sniffing) mode.</description>
+    <group>promisc,</group>
+  </rule>
+
+  <rule id="40501" level="15" timeframe="300" frequency="2" overwrite="yes">
+    <if_group>adduser</if_group>
+    <if_matched_group>attacks</if_matched_group>
+    <same_location />
+    <description>Attacks followed by the addition </description>
+    <description>of an user.</description>
+  </rule>
+
+</group> <!-- SYSLOG,LOCAL -->

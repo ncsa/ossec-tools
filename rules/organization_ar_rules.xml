@@ -1,0 +1,107 @@
+<!-- organization Active Response custom rules -->
+
+<group name="org,org_ar,">
+
+  <rule id="120001" level="14">
+    <program_name>virustotal_lookup.sh</program_name>
+    <match>Malicious hash found</match>
+    <description>Malware hash found in Virus Total</description>
+  </rule>
+
+  <rule id="120002" level="14">
+    <program_name>cymru_lookup.sh</program_name>
+    <match>WARNING</match>
+    <description>Malware hash found in Team Cymru Malware Hash Registry</description>
+  </rule>
+
+
+   <rule id="120003" level="0">
+     <decoded_as>rpm_lookup</decoded_as>
+     <description>Custom RPM Lookup Alert</description>
+     <group>rpm_lookup</group>
+   </rule>
+
+   <rule id="120004" level="11">
+     <if_sid>120003</if_sid>
+     <program_name>rpm_lookup.sh</program_name>
+     <match>WARNING</match>
+     <description>File has been modified, entry in RPM database differs</description>
+     <options>no_email_alert</options>
+     <group>rpm_lookup</group>
+   </rule>
+
+   <rule id="120005" level="0">
+     <decoded_as>puppetdb_lookup</decoded_as>
+     <description>Custom PuppetDB Lookup Alert</description>
+     <group>puppetdb_lookup</group>
+   </rule>
+
+   <rule id="120006" level="11">
+     <if_sid>120005</if_sid>
+     <program_name>puppetdb_lookup.sh</program_name>
+     <match>WARNING</match>
+     <description>Modified file not managed by Puppet</description>
+     <options>no_email_alert</options>
+     <group>puppetdb_lookup</group>
+   </rule>
+
+  <rule id="120007" level="12" timeframe="1">
+    <if_matched_sid>120006</if_matched_sid>
+    <if_sid>120004</if_sid>
+    <same_id />
+    <description>File has been modified and is not in PuppetDB or RPM database</description>
+  </rule>
+
+   <rule id="120008" level="0">
+     <decoded_as>cymru_lookup</decoded_as>
+     <description>Custom Cymru Lookup Alert</description>
+     <group>cymru_lookup</group>
+   </rule>
+
+  <rule id="120009" level="12">
+    <if_sid>120008</if_sid>
+    <list field="id" lookup="address_match_key" >lists/mal.list</list>
+    <description>Malware hash match found from intelligence data</description>
+  </rule>
+
+   <rule id="120010" level="0">
+     <decoded_as>deb_lookup</decoded_as>
+     <description>Custom DEB Lookup Alert</description>
+     <group>deb_lookup</group>
+   </rule>
+
+   <rule id="120011" level="11">
+     <if_sid>120010</if_sid>
+     <program_name>deb_lookup.sh</program_name>
+     <match>WARNING</match>
+     <description>File has been modified, entry in DEB database differs</description>
+     <options>no_email_alert</options>
+     <group>deb_lookup</group>
+   </rule>
+
+   <rule id="120012" level="11">
+     <if_sid>5902</if_sid>
+     <match>UID=\d\d\d,</match>
+     <description>System account created</description>
+   </rule>
+
+  <rule id="120013" level="12">
+    <program_name>command_search.sh</program_name>
+    <match>WARNING</match>
+    <description>Possible suspicious command identified</description>
+  </rule>
+
+  <rule id="120014" level="11">
+    <program_name>time_lookup.sh</program_name>
+    <match>WARNING</match>
+    <description>System clock is off</description>
+  </rule>
+
+  <!-- Ignore messags from ossec server -->
+  <rule id="120015" level="0">
+    <if_sid>120014</if_sid>
+    <match>ossec-sec</match>
+    <description>Ignore clock messages from OSSEC server</description>
+  </rule>
+
+</group>

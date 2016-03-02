@@ -1,0 +1,197 @@
+<!-- organization custom rules --> 
+
+<var name="SECOPS_NETS">1.1.1.|1.2.2.</var>
+<var name="SECOPS_USERS">team1|team2</var>
+<var name="SECOPS_ALL_USERS">$SECOPS_USERS|blah1|blah2</var>
+<var name="SECOPS_ADMIN_USERS">blah3|blah4jh</var>
+<var name="NAGIOS_USERS">nagios|nrpe</var>
+<var name="PROGRAM_USERS">$NAGIOS_USERS|git|qualys|cabackup|zimbra|postgres|gitwriter</var>
+<var name="BAD_SMTP">owencampbell@lawyer.com|DAS@sydenham.lewisham.sch.uk|upgradeteam@admin.in.th|techservice@discuz.org|manager.verificationdepartment@googlemail.com|webaccount@zbavitu.net|info@adimin.com|systemadmniteam@gmail.com|account-supporteam-verification@live.com|tech.dpart@info.lt|hlpdesk7@yahoo.co.uk|webservices@gala.net|admin@coyspu.com.ar|notice@mail2webmaster.com|merijnkatrien@zonnet.nl|notice@mail2webmaster.com|update-check@live.nl|helpweb13@yahoo.com.hk|accountverification@8u8.com|desk.loginupdate@yahoo.com.hk|email.upgrades@gmail.com|helpdeskict1@yahoo.com.hk|edu-accountupdate2008@live.com|webmailteam001@gmail.com|customerhelp_desk@email.com|upgrade.suppteam2008@sanook.com|supp.team2008@ymail.com|s.eamilupgrade@ymail.com|customer.careservice@live.com|abuse-itservice@live.com|upgreatunit@yahoo.com.hk|ldorow@utica.edu|suppteam@mail2webmaster.com|computer.desk@live.com|tech.service18@live.com|customercareunite111@mail2consultant.com|verification_01@live.com</var>
+
+<!-- Note that <hostname> matches agent name, not hostname field in log line -->
+
+<group name="organization">
+
+  <rule id="10002" level="0">
+    <if_sid>5402,5403,5501,5502,5715</if_sid>
+    <match>$NAGIOS_USERS</match>
+    <description>Ignore nagios/nrpe log</description>
+  </rule>
+
+  <rule id="10003" level="0">
+    <program_name>ossec</program_name>
+    <hostname>ossec-sec</hostname>
+    <description>Ignore matching on ossec logs that are fed back in</description>
+  </rule>
+
+  <rule id="10006" level="0">
+    <if_sid>4721</if_sid>
+    <match>$SECOPS_NETS</match>
+    <description>Supress router changes from organization nets</description>
+  </rule>
+
+  <rule id="100016" level="11">
+    <if_sid>5400</if_sid>
+    <hostname>blah1|blah2|blah3|blah4</hostname>
+    <description>sudo use on bastions</description>
+  </rule>
+
+  <rule id="100020" level="8" timeframe="120" frequency="2">
+    <if_matched_sid>5715</if_matched_sid>
+    <same_source_ip />
+    <same_location />
+    <description>Multiple SSH logins from same source IP</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="100021" level="0">
+    <if_sid>100020</if_sid>
+    <match>$SECOPS_NETS</match>
+    <description>Ignore multiple SSH logins from same source SECOPS networks</description>
+    <group>authentication_success,</group>
+  </rule>
+
+  <rule id="100022" level="10" timeframe="300" frequency="8">
+    <if_matched_sid>5710</if_matched_sid>
+    <same_source_ip />
+    <description>Multiple attempt to login using a non-existent user</description>
+  </rule>
+
+  <rule id="100023" level="10">
+    <match>WARN: Syscheck disabled.|WARN: Rootcheck disabled.</match>
+    <description>OSSEC service disabled</description>
+  </rule>
+
+  <rule id="100024" level="0">
+    <if_sid>100020</if_sid>
+    <user>garvey</user>
+    <match>gssapi-with-mic</match>
+    <regex>130.126.3.77</regex>
+    <description>Ignore multiple SSH logins from garvey by same source IP</description>
+  </rule>
+
+  <rule id="100026" level="12">
+    <if_group>authentication_success</if_group>
+    <list field="srcip" lookup="address_match_key" >lists/ip.list</list>
+    <description>Successful authentication from bad IP</description>
+  </rule>
+
+  <rule id="100027" level="13">
+    <if_group>authentication_success</if_group>
+    <list field="srcip" lookup="match_key" >lists/bhr.list</list>
+    <description>Successful authentication from previously BHR'd IP</description>
+  </rule>
+
+   <rule id="100028" level="12">
+    <if_group>web_scan|recon|sqlinjection|attack</if_group>
+    <list field="url" lookup="match_key" >lists/url.list</list>
+    <description>URL Intel list match</description>
+  </rule>
+
+  <rule id="100031" level="12" timeframe="120">
+    <if_sid>5712</if_sid>
+    <if_matched_sid>5715</if_matched_sid>
+    <same_location />
+    <same_source_ip />
+    <same_user />
+    <list field="srcip" lookup="not_address_match_key" >lists/networks.list</list>
+    <description>Success after multiple failed SSH authentications from outside</description>
+  </rule>
+
+  <rule id="100032" level="10" timeframe="120">
+    <if_group>authentication_success</if_group>
+    <if_matched_group>authentication_failed,authenticaton_failures</if_matched_group>
+    <same_source_ip />
+    <same_user />
+    <description>Success after failed authentication</description>
+  </rule>
+
+  <rule id="100033" level="0" timeframe="120">
+    <if_matched_group>system_shutdown</if_matched_group>
+    <if_sid>503,504</if_sid>
+    <same_location />
+    <description>Ignore agent started after system shutdown</description>
+  </rule>
+
+  <rule id="100034" level="8">
+    <url>/contact/|/administrator/|/admin/|/session.php</url>
+    <match>JDatabaseDriverMysqli</match>
+    <description>Possible Joomla! exploitation attempt</description>
+  </rule>
+
+  <rule id="100035" level="8">
+    <if_sid>5715</if_sid>
+    <user>root</user>
+    <list field="srcip" lookup="not_address_match_key" >lists/networks.list</list>
+    <description>Non-organization root login</description>
+  </rule>
+
+  <rule id="100036" level="11">
+    <if_sid>100035</if_sid>
+    <match>password</match>
+    <description>Non-organization root login with password</description>
+  </rule>
+
+  <!-- id is kerberus principal found in log -->
+  <rule id="100038" level="11">
+    <if_sid>15001,15003</if_sid>
+    <list field="id" lookup="not_match_key" >lists/ksu.list</list>
+    <description>Authentication attempted from unvetted ksu user</description>
+  </rule>
+
+  <!-- id is the user executing sudo -->
+  <rule id="100039" level="12">
+    <if_sid>5400</if_sid>
+    <list field="id" lookup="match_key" >lists/system_users.list</list>
+    <description>System account executed sudo</description>
+  </rule>
+
+  <rule id="100040" level="12">
+    <if_sid>5400</if_sid>
+    <list field="status" lookup="match_key" >lists/commands.list</list>
+    <description>Suspicious command executed</description>
+  </rule>
+
+  <rule id="100042" level="11">
+    <match>$BAD_SMTP</match>
+    <description>Illegal E-mail-mail list from 2006 by Aashish</description>
+  </rule>
+
+  <rule id="100043" level="11">
+    <match>OOM for frozen_buffer</match>
+    <description>Kernel went into write mode</description>
+  </rule>
+
+  <rule id="100044" level="11">
+    <match>kernel: Program Xnest tried to access /dev/mem|kernel: Program Xnest tried</match>
+    <description>Possible Phalanx exploit</description>
+  </rule>
+
+  <rule id="100045" level="11">
+    <if_sid>5749</if_sid>
+    <match>Disconnecting: Bad packet length</match>
+    <description>Possible Phalanx exploit</description>
+  </rule>
+
+  <!-- user is any decoded user/dstuser field - it won't always be available -->
+  <rule id="100046" level="11" frequency="0">
+    <if_matched_group>authentication_failed|authenticaton_failures|authentication_success|add_user|account_changed|invalid_login</if_matched_group>
+    <list field="user" lookup="match_key">lists/watched_users.list</list>
+    <description>Watched user alert triggered</description>
+  </rule>
+
+  <!-- id is the user executing sudo -->
+  <rule id="100047" level="11">
+    <if_sid>5400</if_sid>
+    <if_matched_group>syslog,sudo</if_matched_group>
+    <list field="id" lookup="not_match_key">lists/sudo.list</list>
+    <description>Authentication attempted from unvetted sudo user</description>
+  </rule>
+
+  <rule id="100048" level="12" frequency="0">
+    <if_matched_group>authentication_failed|authenticaton_failures|authentication_success|connection_attempt|virus|attacks|invalid_login|syslog</if_matched_group>
+    <list field="srcip" lookup="address_match_key" >lists/watched_ips.list</list>
+    <description>Activity from watched IP list detected</description>
+  </rule>
+
+</group> <!-- SYSLOG,LOCAL -->

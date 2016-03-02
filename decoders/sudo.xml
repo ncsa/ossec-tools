@@ -1,0 +1,39 @@
+<!-- We made some changes to the default decoder.xml file -->
+
+<!--
+   - Allowed fields:
+   - location - where the log came from (only on FTS)
+   - srcuser  - extracts the source username
+   - dstuser  - extracts the destination (target) username
+   - user     - an alias to dstuser (only one of the two can be used)
+   - srcip    - source ip
+   - dstip    - dst ip
+   - srcport  - source port
+   - dstport  - destination port
+   - protocol - protocol
+   - id       - event id
+   - url      - url of the event
+   - action   - event action (deny, drop, accept, etc)
+   - status   - event status (success, failure, etc)
+   - extra_data     - Any extra data
+  -->
+
+<!-- Sudo decoder.
+  -  Will extract the username
+  -  Examples:
+  -  Apr 27 15:22:23 niban sudo:     dcid : TTY=pts/4 ; PWD=/home/dcid ; USER=root ; COMMAND=/usr/bin/tail /var/log/snort/alert.fast
+  -  Apr 27 15:25:08 niban sudo:     dcid : TTY=pts/4 ; PWD=/home/dcid ; USER=root ; COMMAND=/usr/bin/tail /var/log/snort/alert.fast
+  -  Apr 14 10:59:01 enigma sudo:     dcid : TTY=ttyp3 ; PWD=/home/dcid/ossec-hids.0.1a/src/analysisd ; USER=root ; COMMAND=/bin/cp -pr ../../bin/addagent ../../bin/osaudit-logaudi
+t ../../bin/ossec-execd ../../bin/ossec-logcollector ../../bin/ossec-maild ../../bin/ossec-remoted /var/ossec/bin
+  -  Apr 19 14:52:02 enigma sudo:     dcid : TTY=ttyp3 ; PWD=/var/www/alex ; USER=root ; COMMAND=/sbin/chown dcid.dcid .
+  # Additios to default sudo decoder
+  -  2016-02-08T10:35:35.266214-06:00 ossec-sec sudo:  jschipp : TTY=pts/0 ; PWD=/var/ossec/bin ; USER=jschipp ; COMMAND=/bin/bash -c echo balls
+  -  2016-02-08T10:36:10.588567-06:00 ossec-sec sudo:  jschipp : TTY=pts/0 ; PWD=/var/ossec/bin ; USER=root ; COMMAND=/bin/bash -c echo balls
+  -->
+<decoder name="sudo">
+  <program_name>^sudo</program_name>
+  <regex>^\s+(\S+)\s:\sTTY=\S+\s;\sPWD=(\S+)\s;\sUSER=(\S+)\s;\sCOMMAND=(\.+)$</regex>
+  <order>id,url,dstuser,status</order>
+  <fts>name,user,location</fts>
+  <ftscomment>First time user executed the sudo command</ftscomment>
+</decoder>

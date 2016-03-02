@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+FILE=/var/ossec/logs/alerts/alerts.log
+config(){
+cat <<EOF
+graph_title OSSEC Stats
+graph_category process
+graph_vlabel Alert Counters
+graph_info Stats
+graph_period minute
+EOF
+}
+
+if [[ "$1" == "config" ]]; then
+  config
+  for s in all syscheck rootcheck
+  do
+    printf "${s}.label ${s}\n"
+    printf "${s}.min 0\n"
+    printf "${s}.type GAUGE\n"
+    printf "${s}.info Count ${Q}\n"
+  done
+else
+  if [[ -f $FILE ]] && [[ -r $FILE ]]; then
+    syscheck=$(grep -c '\*\* Alert.*syscheck' /var/ossec/logs/alerts/alerts.log)
+    rootcheck=$(grep -c '\*\* Alert.*rootcheck' /var/ossec/logs/alerts/alerts.log)
+    all=$(grep -c '\*\* Alert' /var/ossec/logs/alerts/alerts.log)
+
+    printf "all.value ${all}\n"
+    printf "syscheck.value ${syscheck}\n"
+    printf "rootcheck.value ${rootcheck}\n"
+  else
+    printf "File not found!\n"
+    exit 1
+  fi
+fi

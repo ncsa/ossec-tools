@@ -1,0 +1,79 @@
+<!--
+    - ksu decoder
+ - Will extract the username and command
+ - Examples:
+
+2016-02-01T10:34:58.431957-06:00 ossec-sec ksu[11061]: 'ksu root' authentication failed for vladg on /dev/pts/1
+2016-02-01T10:37:39.372873-06:00 ossec-sec ksu[14243]: 'ksu root' authenticated vladg@ORG.COM for vladg on /dev/pts/1
+2016-02-01T10:36:33.682170-06:00 ossec-sec ksu[13199]: Account root: authorization for vladg@ORG.COM successful
+2016-02-01T10:37:39.377808-06:00 ossec-sec ksu[14243]: Account root: authorization for vladg@ORG.COM for execution of /bin/ls successful
+
+-->
+<decoder name="kerberos_ksu">
+  <program_name>^ksu</program_name>
+</decoder>
+
+<decoder name="ksu_authn_fail">
+  <parent>kerberos_ksu</parent>
+  <prematch>^'ksu \S+' authentication failed</prematch>
+  <regex>^'ksu (\S+)' authentication failed for (\S+) on \S+$</regex>
+  <order>dstuser, id</order>
+</decoder>
+
+<decoder name="ksu_authn_success">
+  <parent>kerberos_ksu</parent>
+  <prematch>^'ksu \S+' authenticated </prematch>
+  <regex>^'ksu (\S+)' authenticated (\S+) for (\S+) on \S+$</regex>
+  <order>dstuser, id, extra_data</order>
+</decoder>
+
+<decoder name="ksu_authz_success">
+  <parent>kerberos_ksu</parent>
+  <prematch>^Account \S+: authorization for \S+ successful</prematch>
+  <regex>^Account (\S+): authorization for (\S+) successful$</regex>
+  <order>dstuser, id</order>
+</decoder>
+
+<decoder name="ksu_authz_success_command">
+  <parent>kerberos_ksu</parent>
+  <prematch>^Account \S+: authorization for \S+ for execution of \S+ successful</prematch>
+  <regex>^Account (\S+): authorization for (\S+) for execution of (\S+) successful$</regex>
+  <order>dstuser, id, extra_data</order>
+</decoder>
+
+<!--
+    - kadmin decoder
+ - Will extract the dstuser, status, id (srcuser), and srcip
+ - Examples:
+Oct  6 08:35:48 brick kadmind[1508]: Request: kadm5_create_principal, arik@ORG.COM, success, client=vdvadmin@ORG.COM, service=kadmin/admin@ORG.COM, addr=141.142.2.28
+Oct  6 08:35:49 brick kadmind[1508]: Request: kadm5_get_principal, arik@ORG.COM, success, client=vdvadmin@ORG.COM, service=kadmin/admin@ORG.COM, addr=141.142.2.28
+May 18 13:36:02 brick kadmind[3072]: Request: kadm5_get_principal, root@ORG.COM, Principal does not exist, client=jbarlow/admin@ORG.COM, service=kadmin/admin@ORG.COM, addr=141.142.2.19
+Oct  6 08:35:49 brick kadmind[1508]: Request: kadm5_modify_principal, arik@ORG.COM, success, client=vdvadmin@ORG.COM, service=kadmin/admin@ORG.COM, addr=141.142.2.28
+-->
+
+<decoder name="kerberos_kadmin">
+  <program_name>^kadmind</program_name>
+</decoder>
+
+<decoder name="kadmin_create_principal">
+  <parent>kerberos_kadmin</parent>
+  <prematch>^Request: kadm5_create_principal,</prematch>
+  <regex>^Request: kadm5_create_principal, (\S+), (\S+), client=(\S+), service=\S+, addr=(\S+)$</regex>
+  <order>dstuser, status, id, srcip</order>
+</decoder>
+
+<decoder name="kadmin_get_principal">
+  <parent>kerberos_kadmin</parent>
+  <prematch>^Request: kadm5_get_principal,</prematch>
+  <regex>^Request: kadm5_get_principal, (\S+), (\S+), client=(\S+), service=\S+, addr=(\S+)$|</regex>
+  <regex>^Request: kadm5_get_principal, (\S+), (Principal does not exist), client=(\S+), service=\S+, addr=(\S+)$</regex>
+  <order>dstuser, status, id, srcip</order>
+</decoder>
+
+<decoder name="kadmin_modify_principal">
+  <parent>kerberos_kadmin</parent>
+  <prematch>^Request: kadm5_modify_principal,</prematch>
+  <regex>^Request: kadm5_modify_principal, (\S+), (\S+), client=(\S+), service=\S+, addr=(\S+)$|</regex>
+  <regex>^Request: kadm5_modify_principal, (\S+), (Principal does not exist), client=(\S+), service=\S+, addr=(\S+)$</regex>
+  <order>dstuser, status, id, srcip</order>
+</decoder>

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+FILE=/var/ossec/logs/alerts/alerts.log
+OPTION="$1"
+
+config(){
+cat <<EOF
+graph_title OSSEC Top Rules
+graph_category process
+graph_vlabel Alerts Name
+graph_info Count
+graph_period minute
+EOF
+}
+
+top_10(){
+  fgrep Rule: /var/ossec/logs/alerts/alerts.log | cut -d " " -f 6- | sort | uniq -c | sort -nr | head
+}
+
+strip(){
+ local msg
+ msg="$@"
+ msg=${msg// }
+ msg=${msg//-}
+ msg=${msg//(}
+ name=${msg//)}
+}
+
+values(){
+  top="$(top_10)"
+  IFS=$'\n'
+  for i in $top;
+  do
+    line=$(echo $i | xargs)
+    count="${line%% *}"
+    rule="${line#* }"
+    msg=${rule%%.}
+    if [[ "$OPTION" == "config" ]]; then
+      printf "${msg}\n"
+    else
+      strip $msg
+      printf "${name}.value ${count}\n"
+   fi
+  done
+}
+
+if [[ "$OPTION" == "config" ]]; then
+  config
+  messages="$(values)"
+  IFS=$'\n'
+  for s in $messages
+  do
+    strip $s
+    printf "${name}.label ${s}\n"
+    printf "${name}.min 0\n"
+    printf "${name}.type GAUGE\n"
+    printf "${name}.info Count ${Q}\n"
+  done
+else
+  if [[ -f $FILE ]] && [[ -r $FILE ]]; then
+    values
+  else
+    printf "File not found!\n"
+    exit 1
+  fi
+fi
