@@ -1,5 +1,11 @@
 # ossec-tools
-Scripts and integrations for OSSEC
+Scripts and integrations for OSSEC. With the following code and configurations
+we transformed our OSSEC deployment from an overwhelming mess of alerts to a
+manageable and useful system where most of the alerts we actually care about.
+
+It includes things like code to block hosts at our perimeter, create intelligence feeds from
+the logs, and only e-mail alerts when a file has changed that is not managed by Puppet and is different from
+what's reported by the package manager's checksums - meaning no alerts for files changed after package updates :)
 
 ## Active Response
 Custom AR scripts
