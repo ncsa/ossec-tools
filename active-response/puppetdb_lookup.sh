@@ -39,7 +39,7 @@ get_alert(){
   local id
   [[ $1 ]] || return 1
   id="$1"
-  awk -v ts=$id 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log || return 1
+  awk -v ts=${id}: 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log || return 1
 }
 
 get_host(){

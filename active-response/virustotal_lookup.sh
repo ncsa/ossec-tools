@@ -32,7 +32,7 @@ check_args(){
 
 get_alert(){
   local alert
-  alert=$(awk -v ts=$ALERTID 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
+  alert=$(awk -v ts=${ALERTID}: 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
   [[ "$alert" ]] || return 1
   printf "$alert\n"
 }

@@ -50,7 +50,7 @@ PWD=$(pwd)
 [[ -f "$AR_LOG" ]] && printf "$(date) $0 $1 $2 $3 $4 $5 $6 $7 $8\n" >> $AR_LOG
 
 # Getting full alert
-ALERT=$(awk -v ts=$ALERTID 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
+ALERT=$(awk -v ts=${ALERTID}: 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
 
 # Obtain hash
 SHA1=$(printf "$ALERT\n" | grep -o '[a-zA-Z0-9]\{40\}' | tail -n 1)
