@@ -6,11 +6,11 @@ Custom AR scripts
 
 * active-response/virustotal_lookup.sh/virus_total.py - Look up hash from syscheck alerts in VT database
 * active-response/cymru_lookup.sh - Look up hash from sysheck alerts in Team Cymru Malware Hash Registery
-* active-response/puppetdb_lookup - Look up managed files in PuppetDB
-* active-response/rpm_lookup - Look up files that changed from RPM install
-* active-response/deb_lookup - Lookup file that changes from DEB install
-* active-response/time_lookup - Check if system clock is off for incoming logs
-* active-response/command_search - Search for malicious commands across logs
+* active-response/puppetdb_lookup.sh - Look up managed files in PuppetDB
+* active-response/rpm_lookup.sh - Look up files that changed from RPM install
+* active-response/deb_lookup.sh - Lookup file that changes from DEB install
+* active-response/time_lookup.sh - Check if system clock is off for incoming logs
+* active-response/command_search.sh - Search for malicious commands across logs
 * active-response/cif.sh - Create intelligence feed from alerts
 * active-response/bhr.sh - Block hosts at perimeter using Black Hole Router by Justin Azoff
 * active-response/add_to_cdb.sh - Add entries from alerts to system database e.g. system users

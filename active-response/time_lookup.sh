@@ -32,7 +32,7 @@ check_args(){
 get_alert(){
   local alert
   local alertid="$1"
-  alert=$(awk -v ts=$alertid 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
+  alert=$(awk -v ts=${alertid}: 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
   [[ "$alert" ]] || return 1
   printf "$alert\n"
 }
@@ -50,7 +50,8 @@ convert_timestamp(){
 
 get_timestamp(){
   local alert="$@"
-  # Attempt to get timestamp by format
+
+  # Attempt to get timestamp from log by format
   ts=$(printf "$alert\n" | grep -o '^20[1-9]\{2\}-[0-9]\{2\}-[0-9]\{2\}T[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\.[0-9]\{6\}')
   if [[ "$ts" ]]; then
     epoch=$(convert_timestamp "$ts")
@@ -74,6 +75,26 @@ get_timestamp(){
   return 1
 }
 
+get_utc_timestamp(){
+  local alert="$@"
+  local ossec_ts
+  local year
+  local datetime
+  local ossec_ts
+  local ossec_epoch
+  # Attempt to get OSSEC alert timestamp (UTC)
+  ossec_ts=$(printf "$alert\n" | grep -o '^20[1-9]\{2\} [A-Z][a-z]\+ [0-9]\{2\} [0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}')
+  if [[ "$ossec_ts" ]]; then
+    # date: invalid date `2016 Feb 25 00:00:17'
+    # Format so year is at end
+    year="${ossec_ts%% *}"
+    datetime="${ossec_ts#* }"
+    ossec_ts="${datetime} ${year}"
+    ossec_epoch=$(convert_timestamp "$ossec_ts") || return 1
+  fi
+  printf "$ossec_epoch\n"
+}
+
 get_hostname(){
   local alert="$@"
   local host
@@ -83,16 +104,33 @@ get_hostname(){
 
 check_existing_entry(){
   local host="$1"
-  fgrep -q "$host" $LOG || return 1
+  fgrep -q "$host" $LOG && return 1
+  return 0
+}
+
+is_utc(){
+  local ossec_ts="$1"
+  local log_ts="$2"
+  local tz=0
+  utc=$((log_ts-3600*5))
+  dst1=$((log_ts-3600*6))
+  dst2=$((log_ts-3600*7))
+  for ts in $utc $dst1 $dst2; do
+    result=$((ossec_ts-ts))
+     [[ $result -eq 18000 ]] && tz=1
+     [[ $result -eq 21600 ]] && tz=1
+     [[ $result -eq 25200 ]] && tz=1
+  done
+  return $tz
 }
 
 check_timestamp(){
-  local ts="$1"
+  local log_ts="$1"
   local host="$2"
   local current=$(date +"%s")
-  seconds="$((ts-current))"
-  [[ $seconds -lt 0 ]]   && die "WARNING: system clock is ahead by $seconds seconds for $host on $ALERTID"
-  [[ $seconds -lt $MAX_TIME ]] || die "WARNING: system clock is behind by $seconds seconds for $host on $ALERTID"
+  seconds="$((current-log_ts))"
+  [[ $seconds -lt 0 ]]   && die "WARNING: system clock is ahead by $seconds seconds for $host on ${ALERTID}, ${current}-${log_ts}"
+  [[ $seconds -lt $MAX_TIME ]] || die "WARNING: system clock is behind by $seconds seconds for $host on ${ALERTID}, ${current}-${log_ts}"
 }
 
 # Check for arguments
@@ -112,6 +150,7 @@ ALERT=$(get_alert "$ALERTID") || exit
 [[ "$ALERT" =~ [Mm]ultiple ]] && exit
 # Get timestamp
 TS=$(get_timestamp "$ALERT") || die "ERROR: get_timestamp: No timestamp found for $ALERTID"
+# Get hostname for logs
 HOST=$(get_hostname "$ALERT")
 # Don't run on ossec logs
 [[ $HOST =~ ossec ]] && exit
@@ -120,4 +159,6 @@ HOST=$(get_hostname "$ALERT")
 # This will cut down on alerts
 check_existing_entry "$HOST" || exit 1
 
+UTC_EPOCH=$(get_utc_timestamp "$ALERT") || die "ERROR: get_utc_timestamp: utc epoch not found in alert"
+is_utc "$UTC_EPOCH" "$TS" || die "WARNING: System clock for $HOST is not localtime on ${ALERTID}, Alert_UTC:${UTC_EPOCH} Log_Local:${TS}"
 check_timestamp "$TS" "$HOST"

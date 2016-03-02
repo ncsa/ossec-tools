@@ -31,7 +31,7 @@ check_args(){
 get_alert(){
   local alert
   local alertid="$1"
-  alert=$(awk -v ts=$alertid 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
+  alert=$(awk -v ts=${alertid}: 'BEGIN { RS=""; ORS="\n" } $0 ~ ts { print }' ${PWD}/../logs/alerts/alerts.log)
   [[ "$alert" ]] || return 1
   echo "$alert"
 }
@@ -45,7 +45,7 @@ get_msg(){
 is_skip(){
   local msg="$@"
   # If we find pattern return 1 to skip logging
-  echo "$msg" | egrep -q 'Bad protocol version identification| [iI]nvalid user |mess id 0x' && return 1
+  echo "$msg" | egrep -q '\]: Updated: Bad protocol version identification|Bad protocol version identification| [iI]nvalid user |mess id 0x' && return 1
   return 0
 }
 
@@ -53,7 +53,8 @@ search_commands(){
   local alert="$@"
   local p='[^a-zA-Z0-9\.=]'
   local na='[^a-zA-Z]' # No alpha
-  local recon="${p}id${p}|uname -a |uname${na}|${p}last${na}|${p}w${na}|whoami|${p}who${na}|wtmp|btmp|shadow"
+  local nan='[^a-zA-Z0-9]' # No alpha & numeric
+  local recon="${p}id${p}|uname -a |uname${na}|${p}last${na}|${p}w${nan}|whoami|${p}who${na}|wtmp|btmp|shadow"
   local shells="${p}sh -i|bash -i |${p}bash |${p}sh -c |${p}sh "
   local escalation="${p}wget|${p}ftp |${p}curl|${p}fetch |${p}john${na}|${p}hashcat|crack|sniff|tcpdump|shark "
   local exploitation="msfpayload|msfcli|metasploit|meterpreter"
