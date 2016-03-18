@@ -16,6 +16,7 @@ Custom AR scripts
 * active-response/rpm_lookup.sh - Look up files that changed from RPM install (must be present on agents)
 * active-response/deb_lookup.sh - Lookup file that changes from DEB install (must be present on agents)
 * active-response/time_lookup.sh - Check if system clock is off or time zone differs for analyzed logs
+* active-response/ldap_lookup.sh - Lookup employee usernames in LDAP database
 * active-response/command_search.sh - Search for malicious commands across logs
 * active-response/cif.sh - Create intelligence feed from alerts
 * active-response/bhr.sh - Block hosts at perimeter using Black Hole Router by Justin Azoff

@@ -104,4 +104,26 @@
     <description>Ignore clock messages from OSSEC server</description>
   </rule>
 
+  <rule id="120020" level="0">
+    <decoded_as>ldap_lookup</decoded_as>
+    <description>Custom LDAP Lookup Alert</description>
+    <group>ldap_lookup</group>
+  </rule>
+
+  <rule id="120021" level="0">
+    <if_sid>120020</if_sid>
+    <program_name>ldap_lookup.sh</program_name>
+    <match>OK</match>
+    <description>Attempted user is an employee</description>
+    <group>ldap_lookup</group>
+  </rule>
+
+  <rule id="120022" level="5">
+    <if_sid>120020</if_sid>
+    <program_name>ldap_lookup.sh</program_name>
+    <match>WARNING</match>
+    <description>Attempted user is not an employee</description>
+    <group>ldap_lookup</group>
+  </rule>
+
 </group>

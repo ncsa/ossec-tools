@@ -68,3 +68,20 @@
   <regex>^(\S+): Malicious hash found for \S+ \((\S+)\)</regex>
   <order>status, id</order>
 </decoder>
+
+<!--
+      - ldap_lookup decoder
+ - Will extract the status, user, dstip (log source), and srcip (e.g. ssh scan source)
+ - Examples:
+ - 2016-03-17T10:59:03.331649-05:00 ossec-sec ldap_lookup.sh: OK: employee lookup for attempted user jschipp: Host 10.2.2.1, Src IP 10.13.32.34, Orig. Alert 1458229125.2049519
+ - 2016-03-17T10:59:03.331649-05:00 ossec-sec ldap_lookup.sh: WARNING: employee lookup for attempted user carltonbanks: Host 10.1.1.1, Src IP 23.234.54.32, Orig. Alert 1458229125.2049519
+ -->
+<decoder name="ldap_lookup">
+  <program_name>^ldap_lookup.sh$</program_name>
+</decoder>
+
+<decoder name="ldap_lookup_info">
+  <parent>ldap_lookup</parent>
+  <regex>^(\S+): NCSA employee lookup for attempted user (\w+): Host (\d+.\d+.\d+.\d+), Src IP (\d+.\d+.\d+.\d+), </regex>
+  <order>status, user, dstip, srcip</order>
+</decoder>

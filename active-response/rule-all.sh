@@ -40,6 +40,7 @@ BHR="$PWD/bin/bhr.sh"
 CDB="$PWD/bin/add_to_cdb.sh"
 CMDS="$PWD/bin/command_search.sh"
 TS="$PWD/bin/time_lookup.sh"
+LDAP="$PWD/bin/ldap_lookup.sh"
 
 printf "$(date) $0 $1 $2 $3 $4 $5 $6 $7 $8\n" >> ${PWD}/../logs/active-responses.log
 
@@ -54,6 +55,9 @@ printf "$(date) $0 $1 $2 $3 $4 $5 $6 $7 $8\n" >> ${PWD}/../logs/active-responses
 
 # Check if system's clock is off
 [[ -x $TS ]] && $TS $1 $2 $3 $4 $5
+
+# Lookup user's in LDAP
+[[ -x $LDAP ]] && $LDAP $1 $2 $3 $4 $5 $6
 
 # CIF Feed
 is_ip && [[ -x $CIF ]] && $CIF $1 $2 $3 $4 $5
