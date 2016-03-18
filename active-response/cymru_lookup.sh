@@ -37,7 +37,7 @@ check_cdb(){
   local checksum
   checksum="$1"
   if [[ -r "$CDB" ]]; then
-    grep -q "$checksum" $CDB && exit 0
+    grep -q "$checksum" $CDB && die "Hash $checksum has been looked up previously"
   fi
 }
 
@@ -57,7 +57,7 @@ SHA1=$(printf "$ALERT\n" | grep -o '[a-zA-Z0-9]\{40\}' | tail -n 1)
 [[ $SHA1 ]] || die "ERROR: No hash found (${ALERTID:-empty})"
 
 # Check if we've looked up this hash previously
-check_cdb "$HASH"
+check_cdb "$SHA1"
 
 # Obtain other info for logging
 [[ "$FILENAME" ]] || FILENAME=$(printf "$ALERT\n" | awk -F "['']" '/^File|changed for:/ { print $2 }')
@@ -68,5 +68,5 @@ result=$(timeout 1s dig +short ${SHA1}.malware.hash.cymru.com A)
 
 # Alert or exit
 [[ "$result" =~ '127.0.0.' ]] && log "WARNING: Malicious hash found for ${FILENAME:-(empty)} ($SHA1) on ${AGENT:-(empty)}"
-send_cdb "$HASH" "$FILENAME"
+send_cdb "$SHA1" "$FILENAME"
 die "OK: No match found for ${FILENAME:-(empty)} ($SHA1) on ${AGENT:-(empty)}"
