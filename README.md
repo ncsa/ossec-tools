@@ -20,7 +20,7 @@ Custom AR scripts
 * active-response/command_search.sh - Search for malicious commands across logs
 * active-response/cif.sh - Create intelligence feed from alerts
 * active-response/bhr.sh - Block hosts at perimeter using Black Hole Router by Justin Azoff
-* active-response/add_to_cdb.sh - Add entries from alerts to system database e.g. system users
+* active-response/add_to_cdb.sh - Add entries from alerts to CDB database (only collect system users at this time)
 * active-response/rule-all.sh - Run many of the above scripts
 * active-response/syscheck-all.sh - Run many of the syscheck scripts
 

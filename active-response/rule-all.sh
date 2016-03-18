@@ -47,7 +47,7 @@ printf "$(date) $0 $1 $2 $3 $4 $5 $6 $7 $8\n" >> ${PWD}/../logs/active-responses
 # Chat
 [[ -x $CHAT ]] && $CHAT $1 $2 $3 $4 $5
 
-# See if we collect information
+# Collect system user accounts from 'new user' events, only work on rule 5902
 [[ -x $CDB ]] && [[ $RULEID -eq 5902 ]] && $CDB $1 $2 $3 $4 $5
 
 # Search for suspicious commands
