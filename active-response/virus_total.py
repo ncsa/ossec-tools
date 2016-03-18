@@ -4,7 +4,7 @@ import urllib
 import urllib2
 import sys
 
-apikey = '843fa2012b619be746ead785b933d59820a2e357c7c186e581e8fcadbe2e550e'
+apikey = '<insert_key_here>'
 
 def usage():
   print '''Submit hash to virtus-total
